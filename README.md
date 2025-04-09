@@ -1,2 +1,2 @@
-# MechAtitronika-Szakoszt-ly---Grafikus-Fel-let-Programoz-s
+# MechAtitronika Szakosztály - GFP
 Ingyen sör és örök élet. 

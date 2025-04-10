@@ -1,0 +1,166 @@
+#pragma once
+
+namespace WindowsForm {
+
+	using namespace System;
+	using namespace System::ComponentModel;
+	using namespace System::Collections;
+	using namespace System::Windows::Forms;
+	using namespace System::Data;
+	using namespace System::Drawing;
+ #include "pch.h"
+
+	/// <summary>
+	/// Summary for Form1
+	/// </summary>
+	public ref class Form1 : public System::Windows::Forms::Form
+	{
+	public:
+		Form1(void)
+		{
+			InitializeComponent();
+			//
+			//TODO: Add the constructor code here
+			//
+		}
+
+	protected:
+		/// <summary>
+		/// Clean up any resources being used.
+		/// </summary>
+		~Form1()
+		{
+			if (components)
+			{
+				delete components;
+			}
+		}
+	private: System::Windows::Forms::PictureBox^ pictureBox1;
+	protected:
+
+	private:
+		/// <summary>
+		/// Required designer variable.
+		/// </summary>
+		System::ComponentModel::Container ^components;
+
+#pragma region Windows Form Designer generated code
+		/// <summary>
+		/// Required method for Designer support - do not modify
+		/// the contents of this method with the code editor.
+		/// </summary>
+		void InitializeComponent(void)
+		{
+			this->pictureBox1 = (gcnew System::Windows::Forms::PictureBox());
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->BeginInit();
+			this->SuspendLayout();
+			// 
+			// pictureBox1
+			// 
+			this->pictureBox1->Location = System::Drawing::Point(12, 12);
+			this->pictureBox1->Name = L"pictureBox1";
+			this->pictureBox1->Size = System::Drawing::Size(431, 342);
+			this->pictureBox1->TabIndex = 0;
+			this->pictureBox1->TabStop = false;
+			this->pictureBox1->Click += gcnew System::EventHandler(this, &Form1::pictureBox1_Click);
+			this->pictureBox1->Paint += gcnew System::Windows::Forms::PaintEventHandler(this, &Form1::pictureBox1_Paint);
+			// 
+			// Form1
+			// 
+			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
+			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
+			this->ClientSize = System::Drawing::Size(455, 366);
+			this->Controls->Add(this->pictureBox1);
+			this->Name = L"Form1";
+			this->Text = L"Form1";
+			this->Load += gcnew System::EventHandler(this, &Form1::Form1_Load);
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->EndInit();
+			this->ResumeLayout(false);
+
+		}
+#pragma endregion
+
+
+	private: System::Void Form1_Load(System::Object^ sender, System::EventArgs^ e) {
+	}
+
+	private: System::Void pictureBox1_Click(System::Object^ sender, System::EventArgs^ e) {
+
+	}
+
+	private: System::Void pictureBox1_Paint(System::Object^ sender, System::Windows::Forms::PaintEventArgs^ e) {
+		Graphics^ g = e->Graphics;  // grafikus felület a rajzoláshoz
+
+		// 1. Négyzet oldalhossz számítása (PictureBox kisebbik mérete * 0.8)
+		int width = this->pictureBox1->ClientSize.Width;
+		int height = this->pictureBox1->ClientSize.Height;
+		int minDim = Math::Min(width, height);            // kisebbik oldal hossza&#8203;:contentReference[oaicite:2]{index=2}
+		int side = (int)(0.8 * minDim + 0.5);           // 80% méret (kerekítve)
+		// 2. Négyzet pozicionálása (középre igazítás)
+		int offsetX = (width - side) / 2;
+		int offsetY = (height - side) / 2;
+
+		// 3. IC test (négyzet) rajzolása körvonallal
+		Pen^ pen = gcnew Pen(Color::Black, 2.0f);
+		int chamfer = (int)(0.05 * side + 0.5);
+
+// 3.2. GraphicsPath a letört sarkokhoz
+System::Drawing::Drawing2D::GraphicsPath^ path = gcnew System::Drawing::Drawing2D::GraphicsPath();
+
+// Sorrend: bal felső, jobb felső, jobb alsó, bal alsó sarok
+path->StartFigure();
+path->AddLine(offsetX + chamfer, offsetY, offsetX + side - chamfer, offsetY); // felső oldal
+path->AddLine(offsetX + side, offsetY + chamfer, offsetX + side, offsetY + side - chamfer); // jobb oldal
+path->AddLine(offsetX + side - chamfer, offsetY + side, offsetX + chamfer, offsetY + side); // alsó oldal
+path->AddLine(offsetX, offsetY + side - chamfer, offsetX, offsetY + chamfer); // bal oldal
+path->CloseFigure();
+
+// Kirajzolás
+g->DrawPath(pen, path);
+
+
+// új segment számítás (letört rész levonva)
+double segment = (side - 2.0 * chamfer) / 21.0;
+int pinLength = (int)(0.10 * side + 0.5);
+int pinWidth = (int)(0.40 * segment + 0.5);
+if (pinWidth < 1) pinWidth = 1;
+
+// új vonalas rajz eszköz
+Pen^ pinPen = gcnew Pen(Color::Black, 1.5f);
+
+// 5. Felső oldali lábak
+for (int i = 1; i <= 20; ++i) {
+	double centerX = offsetX + chamfer + i * segment;
+	int x = (int)(centerX - pinWidth / 2.0);
+	int y = offsetY - pinLength;
+	g->DrawRectangle(pinPen, x, y, pinWidth, pinLength);
+} 
+
+// 6. Alsó oldali lábak
+for (int i = 1; i <= 20; ++i) {
+	double centerX = offsetX + chamfer + i * segment;
+	int x = (int)(centerX - pinWidth / 2.0);
+	int y = offsetY + side;
+	g->DrawRectangle(pinPen, x, y, pinWidth, pinLength);
+}
+
+// 7. Bal oldali lábak
+for (int i = 1; i <= 20; ++i) {
+	double centerY = offsetY + chamfer + i * segment;
+	int x = offsetX - pinLength;
+	int y = (int)(centerY - pinWidth / 2.0);
+	g->DrawRectangle(pinPen, x, y, pinLength, pinWidth);
+}
+
+// 8. Jobb oldali lábak
+for (int i = 1; i <= 20; ++i) {
+	double centerY = offsetY + chamfer + i * segment;
+	int x = offsetX + side;
+	int y = (int)(centerY - pinWidth / 2.0);
+	g->DrawRectangle(pinPen, x, y, pinLength, pinWidth);
+}
+
+
+	}
+	};
+}
